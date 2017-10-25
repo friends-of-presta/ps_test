@@ -23,8 +23,6 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-if (!defined('_PS_VERSION_'))
-    exit;
 class Ps_Test extends Module
 {
     public function __construct()
@@ -34,12 +32,13 @@ class Ps_Test extends Module
         $this->author = 'Mickaël Andrieu';
         parent::__construct();
         $this->displayName = 'Tester';
-        $this->description = 'Module to try template overriding and Symfony services';
+        $this->description = 'Module to demonstrate new customization system with PrestaShop 1.7';
         $this->ps_versions_compliancy = [
             'min' => '1.7.2.0',
             'max' => _PS_VERSION_,
         ];
     }
+
     /**
      * Module installation.
      *
@@ -47,8 +46,9 @@ class Ps_Test extends Module
      */
     public function install()
     {
-        return parent::install();
+        return parent::install() && $this->registerHook('displayDashboardTop');
     }
+
     /**
      * Uninstall the module.
      *
@@ -57,5 +57,17 @@ class Ps_Test extends Module
     public function uninstall()
     {
         return parent::uninstall();
+    }
+
+    /**
+     * List all available manufacturers
+     */
+    public function hookDisplayDashboardTop()
+    {
+        if ($this->isSymfonyContext()) {
+            $manufacturers = $this->get('prestashop.core.api.manufacturer.repository')->getManufacturers();
+
+            dump($manufacturers);
+        }
     }
 }
