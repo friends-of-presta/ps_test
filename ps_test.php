@@ -65,9 +65,9 @@ class Ps_Test extends Module
     public function hookDisplayDashboardTop()
     {
         if ($this->isSymfonyContext()) {
-            $manufacturers = $this->get('prestashop.core.api.manufacturer.repository')->getManufacturers();
+            //$manufacturers = $this->get('prestashop.core.api.manufacturer.repository')->getManufacturers();
 
-            dump($manufacturers);
+            dump("Hello world");
         }
     }
 }
