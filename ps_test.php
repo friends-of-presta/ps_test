@@ -23,6 +23,11 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
+require_once __DIR__.'/vendor/autoload.php';
+
+use Foo\Repository\ProductRepository;
+
 class Ps_Test extends Module
 {
     public function __construct()
@@ -64,10 +69,8 @@ class Ps_Test extends Module
      */
     public function hookDisplayDashboardTop()
     {
-        if ($this->isSymfonyContext()) {
-            //$manufacturers = $this->get('prestashop.core.api.manufacturer.repository')->getManufacturers();
-
-            dump("Hello world");
+        if ($this->isSymfonyContext() && $this->context->controller->getRoute() === 'admin_product_catalog') {
+            dump($this->get('product_repository')->findAllByLangId(1));
         }
     }
 }
