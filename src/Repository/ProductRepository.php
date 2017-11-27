@@ -36,7 +36,7 @@ class ProductRepository
         $statement = $this->connection->prepare($query);
         $statement->bindValue('langId', $langId);
         $statement->execute();
-        
-        return $statement->fetchAll(\PDO::FETCH_OBJ);
+
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
