@@ -23,6 +23,11 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
+require_once __DIR__.'/vendor/autoload.php';
+
+use Foo\Repository\ProductRepository;
+
 class Ps_Test extends Module
 {
     public function __construct()
@@ -46,7 +51,7 @@ class Ps_Test extends Module
      */
     public function install()
     {
-        return parent::install() && $this->registerHook('displayDashboardTop');
+        return parent::install() && $this->registerHook('displayDashboardToolbarIcons');
     }
 
     /**
@@ -60,14 +65,62 @@ class Ps_Test extends Module
     }
 
     /**
-     * List all available manufacturers
+     * Make products export in XML.
+     *
+     * @param $params array
      */
-    public function hookDisplayDashboardTop()
+    public function hookDisplayDashboardToolbarIcons($params)
     {
-        if ($this->isSymfonyContext()) {
-            //$manufacturers = $this->get('prestashop.core.api.manufacturer.repository')->getManufacturers();
+        if ($this->isSymfonyContext() && $params['route'] === 'admin_product_catalog') {
+            $products = $this->getProducts(1);
+            $productsXml = $this->serializeProducts($products);
+            $filepath = _PS_ROOT_DIR_.'/products.xml';
 
-            dump("Hello world");
+            $this->writeFile($productsXml, $filepath);
+
+            return $this->get('twig')->render('@PrestaShop/Foo/download_link.twig',[
+                'filepath' => _PS_BASE_URL_.'/products.xml',
+            ]);
         }
+    }
+
+    /**
+     * Get product list from database by lang.
+     *
+     * @param int $langId
+     * @return array the list of products.
+     */
+    public function getProducts(int $langId)
+    {
+        return $this->get('product_repository')->findAllByLangId($langId);
+    }
+
+    /**
+     * Serialize a list of products.
+     *
+     * @param array $products
+     * @return string the XML output
+     */
+    public function serializeProducts(array $products)
+    {
+        $productsXml = $this->get('serializer')->serialize($products, 'xml', [
+            'xml_root_node_name' => 'products',
+            'xml_format_output' => true,
+        ]);
+
+        return $productsXml;
+    }
+
+    /**
+     * Write file into a specific location.
+     *
+     * @param string $fileContent
+     * @param string $filepath
+     * @throws IOException if the file cannot be written to
+     * @return bool true if the file has been created
+     */
+    public function writeFile(string $fileContent, string $filepath)
+    {
+        $this->get('filesystem')->dumpFile($filepath, $fileContent);
     }
 }
